@@ -183,6 +183,8 @@ Not yet tested on Windows. Some filesystems do not support inode?
 
 =head1 SEE ALSO
 
+L<SHARYANTO>
+
 L<File::Flock>
 
 L<File::Flock::Tiny> which is also tiny, but does not have the autoremove and
