@@ -1,8 +1,11 @@
 Revision history for File-MoreUtil
 
-0.59    2014-12-05 (PERLANCAR) (unreleased)
+0.59    2014-12-05 (PERLANCAR)
 
 	- Rename module/dist from SHARYANTO-File-Util to File-MoreUtil.
+
+	- Split SHARYANTO::File::Flock to its own dist and rename it to
+          File::Flock::Retry.
 
 
 0.58    2014-11-23 (PERLANCAR)
