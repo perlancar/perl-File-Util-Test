@@ -1,4 +1,9 @@
-Revision history for SHARYANTO-File-Util
+Revision history for File-MoreUtil
+
+0.59    2014-12-05 (PERLANCAR) (unreleased)
+
+	- Rename module/dist from SHARYANTO-File-Util to File-MoreUtil.
+
 
 0.58    2014-11-23 (PERLANCAR)
 

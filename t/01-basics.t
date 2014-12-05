@@ -14,7 +14,7 @@ plan skip_all => "symlink() not available"
     unless eval { symlink "", ""; 1 };
 
 use File::Temp qw(tempfile tempdir);
-use SHARYANTO::File::Util qw(file_exists l_abs_path dir_empty);
+use File::MoreUtil qw(file_exists l_abs_path dir_empty);
 
 subtest file_exists => sub {
     my ($fh1, $target)  = tempfile();

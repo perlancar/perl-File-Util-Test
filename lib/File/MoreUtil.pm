@@ -1,4 +1,7 @@
-package SHARYANTO::File::Util;
+package File::MoreUtil;
+
+# DATE
+# VERSION
 
 use 5.010001;
 use strict;
@@ -9,8 +12,6 @@ use Cwd ();
 require Exporter;
 our @ISA = qw(Exporter);
 our @EXPORT_OK = qw(file_exists l_abs_path dir_empty);
-
-# VERSION
 
 our %SPEC;
 
@@ -52,11 +53,12 @@ sub dir_empty {
 
 =head1 SYNOPSIS
 
- use SHARYANTO::File::Util qw(file_exists l_abs_path dir_empty);
+ use File::MoreUtil qw(file_exists l_abs_path dir_empty);
 
  print "file exists" if file_exists("/path/to/file/or/dir");
  print "absolute path = ", l_abs_path("foo");
  print "dir exists and is empty" if dir_empty("/path/to/dir");
+
 
 =head1 DESCRIPTION
 
@@ -114,10 +116,5 @@ Will return true if C<$dir> exists and is empty.
 
 For checking if some path exists, is a regular file, and is empty (content is
 zero-length), you can simply use the C<-z> filetest operator.
-
-
-=head1 SEE ALSO
-
-L<SHARYANTO>
 
 =cut
