@@ -150,8 +150,9 @@ I prefer this approach to blocking/waiting indefinitely or failing immediately.
 =head2 $lock = SHARYANTO::File::Flock->lock($path, \%opts)
 
 Acquire an exclusive lock on C<$path>. C<$path> will be created if not already
-exists. If $path is already locked by another process, will retry (by default
-for 60 seconds). Will die if failed to acquire lock.
+exists. If $path is already locked by another process, will retry every second
+for some time (by default for 60 seconds). Will die if failed to acquire lock
+after all retries.
 
 Will automatically unlock if C<$lock> goes out of scope. Upon unlock, will
 remove C<$path> if it was created and is still empty (this behavior is the same
