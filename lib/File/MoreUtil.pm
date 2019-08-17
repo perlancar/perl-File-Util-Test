@@ -227,7 +227,10 @@ Usage:
 
  dir_has_files($dir) => BOOL
 
-Will return true if C<$dir> exists and has one or more regular files in it.
+Will return true if C<$dir> exists and has one or more plain files in it. A
+plain file is one that passes Perl's C<-f> operator. A symlink to a plain file
+counts as a plain file. Non-plain files include named pipes, Unix sockets, and
+block/character special files.
 
 =head2 dir_has_dot_files
 
@@ -235,8 +238,9 @@ Usage:
 
  dir_has_dot_files($dir) => BOOL
 
-Will return true if C<$dir> exists and has one or more regular dot files (i.e.
-files with names beginning with a dot) in it.
+Will return true if C<$dir> exists and has one or more plain dot files in it.
+See L</dir_has_files> for the definition of plain files. Dot files a.k.a. hidden
+files are files with names beginning with a dot.
 
 =head2 dir_has_non_dot_files
 
@@ -244,8 +248,8 @@ Usage:
 
  dir_has_non_dot_files($dir) => BOOL
 
-Will return true if C<$dir> exists and has one or more regular non-dot files
-(i.e. files with names not beginning with a dot) in it.
+Will return true if C<$dir> exists and has one or more plain non-dot files in
+it. See L</dir_has_dot_files> for the definitions. =head2 dir_has_subdirs
 
 =head2 dir_has_subdirs
 
@@ -261,8 +265,8 @@ Usage:
 
  dir_has_dot_subdirs($dir) => BOOL
 
-Will return true if C<$dir> exists and has one or more regular dot
-subdirectories (i.e. subdirectories with names beginning with a dot) in it.
+Will return true if C<$dir> exists and has one or more dot subdirectories (i.e.
+subdirectories with names beginning with a dot) in it.
 
 =head2 dir_has_non_dot_subdirs
 
@@ -270,15 +274,15 @@ Usage:
 
  dir_has_non_dot_subdirs($dir) => BOOL
 
-Will return true if C<$dir> exists and has one or more regular non-dot
-subdirectories (i.e. subdirectories with names not beginning with a dot) in it.
+Will return true if C<$dir> exists and has one or more non-dot subdirectories
+(i.e. subdirectories with names not beginning with a dot) in it.
 
 
 =head1 FAQ
 
 =head2 Where is file_empty()?
 
-For checking if some path exists, is a regular file, and is empty (content is
+For checking if some path exists, is a plain file, and is empty (content is
 zero-length), you can simply use the C<-z> filetest operator.
 
 =cut
