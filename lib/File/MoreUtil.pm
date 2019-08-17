@@ -218,6 +218,9 @@ Usage:
 
 Will return true if C<$dir> exists and is empty.
 
+This should be trivial but alas it is not. C<-s> always returns true (in other
+words, C<-z> always returns false) for a directory.
+
 =head2 dir_has_files
 
 Usage:
