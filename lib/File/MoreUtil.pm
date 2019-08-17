@@ -285,4 +285,9 @@ Will return true if C<$dir> exists and has one or more non-dot subdirectories
 For checking if some path exists, is a plain file, and is empty (content is
 zero-length), you can simply use the C<-z> filetest operator.
 
+
+=head1 SEE ALSO
+
+L<App::FileTestUtils> includes CLI's for functions like L</dir_empty>, etc.
+
 =cut
