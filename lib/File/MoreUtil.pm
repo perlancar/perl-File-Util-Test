@@ -1,6 +1,8 @@
 package File::MoreUtil;
 
+# AUTHORITY
 # DATE
+# DIST
 # VERSION
 
 use 5.010001;
@@ -21,6 +23,15 @@ our @EXPORT_OK = qw(
                        dir_has_subdirs
                        dir_has_dot_subdirs
                        dir_has_non_dot_subdirs
+
+                       get_dir_entries
+                       get_dir_dot_entries
+                       get_dir_subdirs
+                       get_dir_dot_subdirs
+                       get_dir_non_dot_subdirs
+                       get_dir_files
+                       get_dir_dot_files
+                       get_dir_non_dot_files
                );
 
 our %SPEC;
@@ -135,6 +146,78 @@ sub dir_has_non_dot_subdirs {
     0;
 }
 
+sub get_dir_entries {
+    my ($dir) = @_;
+    $dir //= ".";
+    opendir my($dh), $dir or die "Can't opendir $dir: $!";
+    my @res = grep { $_ ne '.' && $_ ne '..' } readdir $dh;
+    closedir $dh; # we're so nice
+    @res;
+}
+
+sub get_dir_dot_entries {
+    my ($dir) = @_;
+    $dir //= ".";
+    opendir my($dh), $dir or die "Can't opendir $dir: $!";
+    my @res = grep { $_ ne '.' && $_ ne '..' && /\A\./ } readdir $dh;
+    closedir $dh; # we're so nice
+    @res;
+}
+
+sub get_dir_files {
+    my ($dir) = @_;
+    $dir //= ".";
+    opendir my($dh), $dir or die "Can't opendir $dir: $!";
+    my @res = grep { $_ ne '.' && $_ ne '..' && -f } readdir $dh;
+    closedir $dh; # we're so nice
+    @res;
+}
+
+sub get_dir_dot_files {
+    my ($dir) = @_;
+    $dir //= ".";
+    opendir my($dh), $dir or die "Can't opendir $dir: $!";
+    my @res = grep { $_ ne '.' && $_ ne '..' && /\A\./ && -f } readdir $dh;
+    closedir $dh; # we're so nice
+    @res;
+}
+
+sub get_dir_non_dot_files {
+    my ($dir) = @_;
+    $dir //= ".";
+    opendir my($dh), $dir or die "Can't opendir $dir: $!";
+    my @res = grep { $_ ne '.' && $_ ne '..' && !/\A\./ && -f } readdir $dh;
+    closedir $dh; # we're so nice
+    @res;
+}
+
+sub get_dir_subdirs {
+    my ($dir) = @_;
+    $dir //= ".";
+    opendir my($dh), $dir or die "Can't opendir $dir: $!";
+    my @res = grep { $_ ne '.' && $_ ne '..' && -d } readdir $dh;
+    closedir $dh; # we're so nice
+    @res;
+}
+
+sub get_dir_dot_subdirs {
+    my ($dir) = @_;
+    $dir //= ".";
+    opendir my($dh), $dir or die "Can't opendir $dir: $!";
+    my @res = grep { $_ ne '.' && $_ ne '..' && /\A\./ && -d } readdir $dh;
+    closedir $dh; # we're so nice
+    @res;
+}
+
+sub get_dir_non_dot_subdirs {
+    my ($dir) = @_;
+    $dir //= ".";
+    opendir my($dh), $dir or die "Can't opendir $dir: $!";
+    my @res = grep { $_ ne '.' && $_ ne '..' && !/\A\./ && -d } readdir $dh;
+    closedir $dh; # we're so nice
+    @res;
+}
+
 1;
 # ABSTRACT: File-related utilities
 
@@ -150,6 +233,10 @@ sub dir_has_non_dot_subdirs {
      dir_has_subdirs
      dir_has_dot_subdirs
      dir_has_non_dot_subdirs
+
+     dir_entries
+     dir_dot_entries
+     dir_non_dot_entries
  );
 
  print "file exists" if file_exists("/path/to/file/or/dir");
@@ -278,12 +365,126 @@ Will return true if C<$dir> exists and has one or more non-dot subdirectories
 (i.e. subdirectories with names not beginning with a dot) in it.
 
 
+=head2 get_dir_entries
+
+Usage:
+
+ my @entries = get_dir_entries([ $dir ]);
+
+Get all entries of a directory specified by C<$dir> (or the current dir if
+unspecified), including dotfiles but excluding "." and "..". Dies if directory
+does not exist or cannot be read.
+
+Basically a shortcut for something like:
+
+ my @entries = do { opendir my $dh, $dir; grep { $_ ne '.' && $_ ne '..' } readdir $dh };
+
+=head2 get_dir_dot_entries
+
+Usage:
+
+ my @dot_entries = get_dir_dot_entries([ $dir ]);
+
+Get all "dot" entries of a directory specified by C<$dir> (or the current dir if
+unspecified), excluding "." and "..". Dies if directory does not exist or cannot
+be read.
+
+Basically a shortcut for something like:
+
+ my @dot_entries = do { opendir my $dh, $dir; grep { $_ ne '.' && $_ ne '..' && /\A\./ } readdir $dh };
+
+=head2 get_dir_files
+
+Usage:
+
+ my @filenames = get_dir_files([ $dir ]);
+
+Get all filename entries of a directory specified by C<$dir> (or the current dir
+if unspecified), including dotfiles but excluding "." and "..". Dies if
+directory does not exist or cannot be read.
+
+Basically a shortcut for something like:
+
+ my @filenames = do { opendir my $dh, $dir; grep { $_ ne '.' && $_ ne '..' && -f } readdir $dh };
+
+=head2 get_dir_dot_files
+
+Usage:
+
+ my @dot_filenames = get_dir_dot_files([ $dir ]);
+
+Get all "dot" filename entries of a directory specified by C<$dir> (or the
+current dir if unspecified). Dies if directory does not exist or cannot be read.
+
+Basically a shortcut for something like:
+
+ my @dot_filenames = do { opendir my $dh, $dir; grep { $_ ne '.' && $_ ne '..' && /\A\./ && -f } readdir $dh };
+
+=head2 get_dir_non_dot_files
+
+Usage:
+
+ my @non_dot_filenames = get_dir_non_dot_files([ $dir ]);
+
+Get all non-"dot" filename entries of a directory specified by C<$dir> (or the
+current dir if unspecified). Dies if directory does not exist or cannot be read.
+
+Basically a shortcut for something like:
+
+ my @non_dot_filenames = do { opendir my $dh, $dir; grep { !/\A\./ && -f } readdir $dh };
+
+=head2 get_dir_subdirs
+
+Usage:
+
+ my @subdirnames = get_dir_subdirs([ $dir ]);
+
+Get all subdirectory entries of a directory specified by C<$dir> (or the current
+dir if unspecified), including dotsubdirs but excluding "." and "..". Dies if
+directory does not exist or cannot be read.
+
+Basically a shortcut for something like:
+
+ my @subdirnames = do { opendir my $dh, $dir; grep { $_ ne '.' && $_ ne '..' && -d } readdir $dh };
+
+=head2 get_dir_dot_subdirs
+
+Usage:
+
+ my @dot_subdirnames = get_dir_dot_subdirs([ $dir ]);
+
+Get all "dot" subdirectory entries of a directory specified by C<$dir> (or the
+current dir if unspecified). Dies if directory does not exist or cannot be read.
+
+Basically a shortcut for something like:
+
+ my @dot_subdirnames = do { opendir my $dh, $dir; grep { $_ ne '.' && $_ ne '..' && /\A\./ && -d } readdir $dh };
+
+=head2 get_dir_non_dot_subdirs
+
+Usage:
+
+ my @non_dot_subdirnames = get_dir_non_dot_subdirs([ $dir ]);
+
+Get all non-"dot" subdirectory entries of a directory specified by C<$dir> (or
+the current dir if unspecified). Dies if directory does not exist or cannot be
+read.
+
+Basically a shortcut for something like:
+
+ my @non_dot_subdirnames = do { opendir my $dh, $dir; grep { !/\A\./ && -d } readdir $dh };
+
+
 =head1 FAQ
 
 =head2 Where is file_empty()?
 
 For checking if some path exists, is a plain file, and is empty (content is
 zero-length), you can simply use the C<-z> filetest operator.
+
+=head2 Where is get_dir_non_dot_entries()?
+
+That would be a regular glob("*").
 
 
 =head1 SEE ALSO
