@@ -21,12 +21,14 @@ our @EXPORT_OK = qw(
                        dir_has_dot_files
                        dir_has_non_dot_files
                        dir_has_subdirs
+                       dir_has_non_subdirs
                        dir_has_dot_subdirs
                        dir_has_non_dot_subdirs
 
                        get_dir_entries
                        get_dir_dot_entries
                        get_dir_subdirs
+                       get_dir_non_subdirs
                        get_dir_dot_subdirs
                        get_dir_non_dot_subdirs
                        get_dir_files
@@ -114,8 +116,21 @@ sub dir_has_subdirs {
     return undef unless opendir my($dh), $dir;
     while (defined(my $e = readdir $dh)) {
         next if $e eq '.' || $e eq '..';
-        next unless -d "$dir/$e";
+        next if -l "$dir/$e";
+        next unless -d _;
         return 1;
+    }
+    0;
+}
+
+sub dir_has_non_subdirs {
+    my ($dir) = @_;
+    return undef unless (-d $dir);
+    return undef unless opendir my($dh), $dir;
+    while (defined(my $e = readdir $dh)) {
+        next if $e eq '.' || $e eq '..';
+        return 1 if -l "$dir/$e";
+        return 1 if !(-d _);
     }
     0;
 }
@@ -127,7 +142,8 @@ sub dir_has_dot_subdirs {
     while (defined(my $e = readdir $dh)) {
         next if $e eq '.' || $e eq '..';
         next unless $e =~ /\A\./;
-        next unless -d "$dir/$e";
+        next if -l "$dir/$e";
+        next unless -d _;
         return 1;
     }
     0;
@@ -140,7 +156,8 @@ sub dir_has_non_dot_subdirs {
     while (defined(my $e = readdir $dh)) {
         next if $e eq '.' || $e eq '..';
         next if $e =~ /\A\./;
-        next unless -d "$dir/$e";
+        next if -l "$dir/$e";
+        next unless -d _;
         return 1;
     }
     0;
@@ -195,7 +212,16 @@ sub get_dir_subdirs {
     my ($dir) = @_;
     $dir //= ".";
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
-    my @res = grep { $_ ne '.' && $_ ne '..' && -d } readdir $dh;
+    my @res = grep { $_ ne '.' && $_ ne '..' && !(-l) && (-d _) } readdir $dh;
+    closedir $dh; # we're so nice
+    @res;
+}
+
+sub get_dir_non_subdirs {
+    my ($dir) = @_;
+    $dir //= ".";
+    opendir my($dh), $dir or die "Can't opendir $dir: $!";
+    my @res = grep { $_ ne '.' && $_ ne '..' && ((-l) || !(-d _)) } readdir $dh;
     closedir $dh; # we're so nice
     @res;
 }
@@ -204,7 +230,7 @@ sub get_dir_dot_subdirs {
     my ($dir) = @_;
     $dir //= ".";
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
-    my @res = grep { $_ ne '.' && $_ ne '..' && /\A\./ && -d } readdir $dh;
+    my @res = grep { $_ ne '.' && $_ ne '..' && /\A\./ && !(-l) && (-d _) } readdir $dh;
     closedir $dh; # we're so nice
     @res;
 }
@@ -213,7 +239,7 @@ sub get_dir_non_dot_subdirs {
     my ($dir) = @_;
     $dir //= ".";
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
-    my @res = grep { $_ ne '.' && $_ ne '..' && !/\A\./ && -d } readdir $dh;
+    my @res = grep { $_ ne '.' && $_ ne '..' && !/\A\./ && !(-l) && (-d _) } readdir $dh;
     closedir $dh; # we're so nice
     @res;
 }
@@ -231,12 +257,19 @@ sub get_dir_non_dot_subdirs {
      dir_has_dot_files
      dir_has_non_dot_files
      dir_has_subdirs
+     dir_has_non_subdirs
      dir_has_dot_subdirs
      dir_has_non_dot_subdirs
 
-     dir_entries
-     dir_dot_entries
-     dir_non_dot_entries
+     get_dir_entries
+     get_dir_dot_entries
+     get_dir_subdirs
+     get_dir_non_subdirs
+     get_dir_dot_subdirs
+     get_dir_non_dot_subdirs
+     get_dir_files
+     get_dir_dot_files
+     get_dir_non_dot_files
  );
 
  print "file exists" if file_exists("/path/to/file/or/dir");
@@ -342,9 +375,20 @@ it. See L</dir_has_dot_files> for the definitions. =head2 dir_has_subdirs
 
 Usage:
 
- dir_has_files($dir) => BOOL
+ dir_has_subdirs($dir) => BOOL
 
-Will return true if C<$dir> exists and has one or more subdirectories in it.
+Will return true if C<$dir> exists and has one or more subdirectories in it. A
+symlink to a directory does I<NOT> count as subdirectory.
+
+=head2 dir_has_non_subdirs
+
+Usage:
+
+ dir_has_non_subdirs($dir) => BOOL
+
+Will return true if C<$dir> exists and has one or more non-subdirectories in it.
+A symlink to a directory does I<NOT> count as subdirectory and thus counts as a
+non-subdirectory.
 
 =head2 dir_has_dot_subdirs
 
@@ -353,7 +397,8 @@ Usage:
  dir_has_dot_subdirs($dir) => BOOL
 
 Will return true if C<$dir> exists and has one or more dot subdirectories (i.e.
-subdirectories with names beginning with a dot) in it.
+subdirectories with names beginning with a dot) in it. A symlink to a directory
+does I<NOT> count as subdirectory.
 
 =head2 dir_has_non_dot_subdirs
 
@@ -362,7 +407,8 @@ Usage:
  dir_has_non_dot_subdirs($dir) => BOOL
 
 Will return true if C<$dir> exists and has one or more non-dot subdirectories
-(i.e. subdirectories with names not beginning with a dot) in it.
+(i.e. subdirectories with names not beginning with a dot) in it. A symlink to a
+directory does I<NOT> count as subdirectory.
 
 
 =head2 get_dir_entries
@@ -399,9 +445,10 @@ Usage:
 
  my @filenames = get_dir_files([ $dir ]);
 
-Get all filename entries of a directory specified by C<$dir> (or the current dir
-if unspecified), including dotfiles but excluding "." and "..". Dies if
-directory does not exist or cannot be read.
+Get all plain filename entries of a directory specified by C<$dir> (or the
+current dir if unspecified), including dotfiles but excluding "." and "..". See
+L</dir_has_files> for definition of "plain files". Dies if directory does not
+exist or cannot be read.
 
 Basically a shortcut for something like:
 
@@ -413,8 +460,9 @@ Usage:
 
  my @dot_filenames = get_dir_dot_files([ $dir ]);
 
-Get all "dot" filename entries of a directory specified by C<$dir> (or the
-current dir if unspecified). Dies if directory does not exist or cannot be read.
+Get all "dot" plain filename entries of a directory specified by C<$dir> (or the
+current dir if unspecified). See L</dir_has_files> for definition of "plain
+files". Dies if directory does not exist or cannot be read.
 
 Basically a shortcut for something like:
 
@@ -426,8 +474,9 @@ Usage:
 
  my @non_dot_filenames = get_dir_non_dot_files([ $dir ]);
 
-Get all non-"dot" filename entries of a directory specified by C<$dir> (or the
-current dir if unspecified). Dies if directory does not exist or cannot be read.
+Get all non-"dot" plain filename entries of a directory specified by C<$dir> (or
+the current dir if unspecified). See L</dir_has_files> for definition of "plain
+files". Dies if directory does not exist or cannot be read.
 
 Basically a shortcut for something like:
 
@@ -440,12 +489,27 @@ Usage:
  my @subdirnames = get_dir_subdirs([ $dir ]);
 
 Get all subdirectory entries of a directory specified by C<$dir> (or the current
-dir if unspecified), including dotsubdirs but excluding "." and "..". Dies if
-directory does not exist or cannot be read.
+dir if unspecified), including dotsubdirs but excluding "." and "..". See
+L</dir_has_subdirs> for definition of "subdirectories". Dies if directory does
+not exist or cannot be read.
 
 Basically a shortcut for something like:
 
- my @subdirnames = do { opendir my $dh, $dir; grep { $_ ne '.' && $_ ne '..' && -d } readdir $dh };
+ my @subdirnames = do { opendir my $dh, $dir; grep { $_ ne '.' && $_ ne '..' && !(-l) && (-d _) } readdir $dh };
+
+=head2 get_dir_non_subdirs
+
+Usage:
+
+ my @nonsubdirnames = get_dir_non_subdirs([ $dir ]);
+
+Get all non-subdirectory entries of a directory specified by C<$dir> (or the
+current dir if unspecified). See L</dir_has_subdirs> for definition of
+"subdirectories". Dies if directory does not exist or cannot be read.
+
+Basically a shortcut for something like:
+
+ my @nonsubdirnames = do { opendir my $dh, $dir; grep { $_ ne '.' && $_ ne '..' && !(-l) && !(-d) } readdir $dh };
 
 =head2 get_dir_dot_subdirs
 
@@ -454,7 +518,8 @@ Usage:
  my @dot_subdirnames = get_dir_dot_subdirs([ $dir ]);
 
 Get all "dot" subdirectory entries of a directory specified by C<$dir> (or the
-current dir if unspecified). Dies if directory does not exist or cannot be read.
+current dir if unspecified). See L</dir_has_subdirs> for definition of
+"subdirectories". Dies if directory does not exist or cannot be read.
 
 Basically a shortcut for something like:
 
@@ -467,8 +532,8 @@ Usage:
  my @non_dot_subdirnames = get_dir_non_dot_subdirs([ $dir ]);
 
 Get all non-"dot" subdirectory entries of a directory specified by C<$dir> (or
-the current dir if unspecified). Dies if directory does not exist or cannot be
-read.
+the current dir if unspecified). See L</dir_has_subdirs> for definition of
+"subdirectories". Dies if directory does not exist or cannot be read.
 
 Basically a shortcut for something like:
 
