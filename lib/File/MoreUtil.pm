@@ -1,3 +1,4 @@
+## no critic: Subroutines::ProhibitExplicitReturnUndef
 package File::MoreUtil;
 
 # AUTHORITY
