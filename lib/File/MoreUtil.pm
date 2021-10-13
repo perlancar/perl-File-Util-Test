@@ -17,6 +17,8 @@ our @EXPORT_OK = qw(
                        file_exists
                        l_abs_path
                        dir_empty
+                       dir_not_empty
+                       dir_has_entries
                        dir_has_files
                        dir_has_dot_files
                        dir_has_non_dot_files
@@ -71,6 +73,19 @@ sub dir_empty {
     }
     1;
 }
+
+sub dir_not_empty {
+    my ($dir) = @_;
+    return undef unless (-d $dir);
+    return undef unless opendir my($dh), $dir;
+    while (defined(my $e = readdir $dh)) {
+        next if $e eq '.' || $e eq '..';
+        return 1;
+    }
+    0;
+}
+
+sub dir_has_entries { goto \&dir_not_empty }
 
 sub dir_has_files {
     my ($dir) = @_;
@@ -341,6 +356,24 @@ Will return true if C<$dir> exists and is empty.
 This should be trivial but alas it is not. C<-s> always returns true (in other
 words, C<-z> always returns false) for a directory.
 
+To test that a directory is C<not> empty, use L</dir_not_empty> (or its alias
+L</dir_has_entries>).
+
+=head2 dir_not_empty
+
+Usage:
+
+ dir_not_empty($dir) => BOOL
+
+Will return true if C<$dir> exists and is not empty (has entries other than C<.>
+and C<..>).
+
+To test that a directory is empty, use L</dir_empty>.
+
+=head2 dir_has_entries
+
+Alias for L</dir_not_empty>.
+
 =head2 dir_has_files
 
 Usage:
@@ -409,7 +442,6 @@ Usage:
 Will return true if C<$dir> exists and has one or more non-dot subdirectories
 (i.e. subdirectories with names not beginning with a dot) in it. A symlink to a
 directory does I<NOT> count as subdirectory.
-
 
 =head2 get_dir_entries
 
@@ -545,7 +577,7 @@ Basically a shortcut for something like:
 =head2 Where is file_empty()?
 
 For checking if some path exists, is a plain file, and is empty (content is
-zero-length), you can simply use the C<-z> filetest operator.
+zero-length), you can simply use the C<-s> or C<-z> filetest operator.
 
 =head2 Where is get_dir_non_dot_entries()?
 
