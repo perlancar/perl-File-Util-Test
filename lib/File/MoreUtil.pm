@@ -1,19 +1,18 @@
 ## no critic: Subroutines::ProhibitExplicitReturnUndef
 package File::MoreUtil;
 
-# AUTHORITY
-# DATE
-# DIST
-# VERSION
-
 use 5.010001;
 use strict;
 use warnings;
 
 use Cwd ();
+use Exporter 'import';
 
-require Exporter;
-our @ISA = qw(Exporter);
+# AUTHORITY
+# DATE
+# DIST
+# VERSION
+
 our @EXPORT_OK = qw(
                        file_exists
                        l_abs_path
@@ -320,6 +319,13 @@ but:
 This function performs the following test:
 
  !(-l "sym") && (-e _) || (-l _)
+
+Which one should you use: C<-e> or C<file_exists>? It depends on whether you
+want to consider a broken symlink as "existing" or not. Sometimes one is more
+appropriate than the other. If you use C<-e>, your application might overwrite a
+(temporarily) broken symlink; on the other hand if you use C<file_exists>, your
+application will see a file as existing but gets confused when it cannot open
+it.
 
 =head2 l_abs_path
 
