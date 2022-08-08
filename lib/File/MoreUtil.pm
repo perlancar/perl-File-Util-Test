@@ -26,6 +26,9 @@ our @EXPORT_OK = qw(
                        dir_has_non_subdirs
                        dir_has_dot_subdirs
                        dir_has_non_dot_subdirs
+                       dir_only_has_files
+                       dir_only_has_dot_files
+                       dir_only_has_non_dot_files
 
                        get_dir_entries
                        get_dir_dot_entries
@@ -99,6 +102,19 @@ sub dir_has_files {
     0;
 }
 
+sub dir_only_has_files {
+    my ($dir) = @_;
+    return undef unless (-d $dir);
+    return undef unless opendir my($dh), $dir;
+    my $has_files;
+    while (defined(my $e = readdir $dh)) {
+        next if $e eq '.' || $e eq '..';
+        return 0 unless -f "$dir/$e";
+        $has_files++;
+    }
+    $has_files ? 1:0;
+}
+
 sub dir_has_dot_files {
     my ($dir) = @_;
     return undef unless (-d $dir);
@@ -112,6 +128,20 @@ sub dir_has_dot_files {
     0;
 }
 
+sub dir_only_has_dot_files {
+    my ($dir) = @_;
+    return undef unless (-d $dir);
+    return undef unless opendir my($dh), $dir;
+    my $has_dot_files;
+    while (defined(my $e = readdir $dh)) {
+        next if $e eq '.' || $e eq '..';
+        return 0 unless $e =~ /\A\./;
+        return 0 unless -f "$dir/$e";
+        $has_dot_files++;
+    }
+    $has_dot_files ? 1:0;
+}
+
 sub dir_has_non_dot_files {
     my ($dir) = @_;
     return undef unless (-d $dir);
@@ -123,6 +153,20 @@ sub dir_has_non_dot_files {
         return 1;
     }
     0;
+}
+
+sub dir_only_has_non_dot_files {
+    my ($dir) = @_;
+    return undef unless (-d $dir);
+    return undef unless opendir my($dh), $dir;
+    my $has_nondot_files;
+    while (defined(my $e = readdir $dh)) {
+        next if $e eq '.' || $e eq '..';
+        return 0 if $e =~ /\A\./;
+        return 0 unless -f "$dir/$e";
+        $has_nondot_files++;
+    }
+    $has_nondot_files ? 1:0;
 }
 
 sub dir_has_subdirs {
@@ -449,6 +493,16 @@ Usage:
 Will return true if C<$dir> exists and has one or more non-dot subdirectories
 (i.e. subdirectories with names not beginning with a dot) in it. A symlink to a
 directory does I<NOT> count as subdirectory.
+
+=head2 dir_only_has_dot_files
+
+Usage:
+
+ dir_only_has_dot_files($dir) => BOOL
+
+Will return true if C<$dir> exists and has one or more plain dot files in it
+*and* does not have anything else. See L</dir_has_files> for the definition of
+plain files.
 
 =head2 get_dir_entries
 
