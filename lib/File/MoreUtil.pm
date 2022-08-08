@@ -494,6 +494,16 @@ Will return true if C<$dir> exists and has one or more non-dot subdirectories
 (i.e. subdirectories with names not beginning with a dot) in it. A symlink to a
 directory does I<NOT> count as subdirectory.
 
+=head2 dir_only_has_files
+
+Usage:
+
+ dir_only_has_files($dir) => BOOL
+
+Will return true if C<$dir> exists and has one or more plain files in it *and*
+does not have anything else. See L</dir_has_files> for the definition of plain
+files.
+
 =head2 dir_only_has_dot_files
 
 Usage:
@@ -501,6 +511,16 @@ Usage:
  dir_only_has_dot_files($dir) => BOOL
 
 Will return true if C<$dir> exists and has one or more plain dot files in it
+*and* does not have anything else. See L</dir_has_files> for the definition of
+plain files.
+
+=head2 dir_only_has_non_dot_files
+
+Usage:
+
+ dir_only_has_non_dot_files($dir) => BOOL
+
+Will return true if C<$dir> exists and has one or more plain non-dot files in it
 *and* does not have anything else. See L</dir_has_files> for the definition of
 plain files.
 
