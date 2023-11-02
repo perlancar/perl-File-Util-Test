@@ -288,7 +288,7 @@ sub get_dir_files {
     my ($dir) = @_;
     $dir //= ".";
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
-    my @res = grep { $_ ne '.' && $_ ne '..' && -f } readdir $dh;
+    my @res = grep { $_ ne '.' && $_ ne '..' && (-f "$dir/$_")} readdir $dh;
     closedir $dh; # we're so nice
     @res;
 }
@@ -297,7 +297,7 @@ sub get_dir_dot_files {
     my ($dir) = @_;
     $dir //= ".";
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
-    my @res = grep { $_ ne '.' && $_ ne '..' && /\A\./ && -f } readdir $dh;
+    my @res = grep { $_ ne '.' && $_ ne '..' && /\A\./ && (-f "$dir/$_")} readdir $dh;
     closedir $dh; # we're so nice
     @res;
 }
@@ -306,7 +306,7 @@ sub get_dir_non_dot_files {
     my ($dir) = @_;
     $dir //= ".";
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
-    my @res = grep { $_ ne '.' && $_ ne '..' && !/\A\./ && -f } readdir $dh;
+    my @res = grep { $_ ne '.' && $_ ne '..' && !/\A\./ && (-f "$dir/$_")} readdir $dh;
     closedir $dh; # we're so nice
     @res;
 }
@@ -315,7 +315,7 @@ sub get_dir_subdirs {
     my ($dir) = @_;
     $dir //= ".";
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
-    my @res = grep { $_ ne '.' && $_ ne '..' && !(-l) && (-d _) } readdir $dh;
+    my @res = grep { $_ ne '.' && $_ ne '..' && !(-l "$dir/$_") && (-d _) } readdir $dh;
     closedir $dh; # we're so nice
     @res;
 }
@@ -324,7 +324,7 @@ sub get_dir_non_subdirs {
     my ($dir) = @_;
     $dir //= ".";
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
-    my @res = grep { $_ ne '.' && $_ ne '..' && ((-l) || !(-d _)) } readdir $dh;
+    my @res = grep { $_ ne '.' && $_ ne '..' && ((-l "$dir/$_") || !(-d _)) } readdir $dh;
     closedir $dh; # we're so nice
     @res;
 }
@@ -333,7 +333,7 @@ sub get_dir_dot_subdirs {
     my ($dir) = @_;
     $dir //= ".";
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
-    my @res = grep { $_ ne '.' && $_ ne '..' && /\A\./ && !(-l) && (-d _) } readdir $dh;
+    my @res = grep { $_ ne '.' && $_ ne '..' && /\A\./ && !(-l "$dir/$_") && (-d _) } readdir $dh;
     closedir $dh; # we're so nice
     @res;
 }
@@ -342,7 +342,7 @@ sub get_dir_non_dot_subdirs {
     my ($dir) = @_;
     $dir //= ".";
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
-    my @res = grep { $_ ne '.' && $_ ne '..' && !/\A\./ && !(-l) && (-d _) } readdir $dh;
+    my @res = grep { $_ ne '.' && $_ ne '..' && !/\A\./ && !(-l "$dir/$_") && (-d _) } readdir $dh;
     closedir $dh; # we're so nice
     @res;
 }
