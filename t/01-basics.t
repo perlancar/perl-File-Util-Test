@@ -38,6 +38,8 @@ use File::MoreUtil qw(
                          get_dir_files
                          get_dir_dot_files
                          get_dir_non_dot_files
+                         get_dir_only_file
+                         get_dir_only_subdir
                  );
 use File::Temp qw(tempfile tempdir);
 
@@ -276,6 +278,26 @@ subtest "get_dir_*{entries,files,subdirs}" => sub {
               [".dotdir"]);
     is_deeply([sort( get_dir_non_dot_subdirs() )],
               ["dir"]);
+
+    $CWD = "dir";
+    mkdir "subdir1", 0755;
+    mkdir "subdir2", 0755;
+    {
+        local $CWD = "subdir1";
+        is_deeply([get_dir_only_file()], [undef]);
+        write_text "f1", "";
+        is_deeply(get_dir_only_file(), "f1");
+        write_text "f2", "";
+        is_deeply([get_dir_only_file()], []);
+    }
+    {
+        local $CWD = "subdir2";
+        is_deeply([get_dir_only_subdir()], [undef]);
+        mkdir "d1";
+        is_deeply(get_dir_only_subdir(), "d1");
+        mkdir "d2";
+        is_deeply([get_dir_only_subdir()], []);
+    }
 
 };
 

@@ -42,6 +42,8 @@ our @EXPORT_OK = qw(
                        get_dir_files
                        get_dir_dot_files
                        get_dir_non_dot_files
+                       get_dir_only_file
+                       get_dir_only_subdir
                );
 
 our %SPEC;
@@ -347,6 +349,36 @@ sub get_dir_non_dot_subdirs {
     @res;
 }
 
+sub get_dir_only_file {
+    my ($dir) = @_;
+    $dir //= ".";
+    opendir my($dh), $dir or die "Can't opendir $dir: $!";
+    my $res;
+    while (defined(my $e = readdir $dh)) {
+        next if $e eq '.' || $e eq '..';
+        return unless -f "$dir/$e";
+        return if defined $res;
+        $res = $e;
+    }
+    return unless defined $res;
+    $res;
+}
+
+sub get_dir_only_subdir {
+    my ($dir) = @_;
+    $dir //= ".";
+    opendir my($dh), $dir or die "Can't opendir $dir: $!";
+    my $res;
+    while (defined(my $e = readdir $dh)) {
+        next if $e eq '.' || $e eq '..';
+        return unless -d "$dir/$e";
+        return if defined $res;
+        $res = $e;
+    }
+    return unless defined $res;
+    $res;
+}
+
 1;
 # ABSTRACT: File-related utilities
 
@@ -379,6 +411,8 @@ sub get_dir_non_dot_subdirs {
      get_dir_files
      get_dir_dot_files
      get_dir_non_dot_files
+     get_dir_only_file
+     get_dir_only_subdir
  );
 
  print "file exists" if file_exists("/path/to/file/or/dir");
@@ -728,6 +762,24 @@ the current dir if unspecified). See L</dir_has_subdirs> for definition of
 Basically a shortcut for something like:
 
  my @non_dot_subdirnames = do { opendir my $dh, $dir; grep { !/\A\./ && -d } readdir $dh };
+
+=head2 get_dir_only_file
+
+Usage:
+
+ my $filename = get_dir_only_file([ $dir ]);
+
+Return filename inside directory C<$dir> (or current directory if unspecified)
+only if C<$dir> has a single plain file and nothing else.
+
+=head2 get_dir_only_subdir
+
+Usage:
+
+ my $subdirname = get_dir_only_subdir([ $dir ]);
+
+Return subdirectory name inside directory C<$dir> (or current directory if
+unspecified) only if C<$dir> has a single subdirectory and nothing else.
 
 
 =head1 FAQ
