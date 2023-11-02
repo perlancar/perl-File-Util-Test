@@ -29,6 +29,9 @@ our @EXPORT_OK = qw(
                        dir_only_has_files
                        dir_only_has_dot_files
                        dir_only_has_non_dot_files
+                       dir_only_has_subdirs
+                       dir_only_has_dot_subdirs
+                       dir_only_has_non_dot_subdirs
 
                        get_dir_entries
                        get_dir_dot_entries
@@ -182,6 +185,19 @@ sub dir_has_subdirs {
     0;
 }
 
+sub dir_only_has_subdirs {
+    my ($dir) = @_;
+    return undef unless (-d $dir);
+    return undef unless opendir my($dh), $dir;
+    my $has_subdirs;
+    while (defined(my $e = readdir $dh)) {
+        next if $e eq '.' || $e eq '..';
+        return 0 unless -d "$dir/$e";
+        $has_subdirs++;
+    }
+    $has_subdirs ? 1:0;
+}
+
 sub dir_has_non_subdirs {
     my ($dir) = @_;
     return undef unless (-d $dir);
@@ -208,6 +224,20 @@ sub dir_has_dot_subdirs {
     0;
 }
 
+sub dir_only_has_dot_subdirs {
+    my ($dir) = @_;
+    return undef unless (-d $dir);
+    return undef unless opendir my($dh), $dir;
+    my $has_dot_subdirs;
+    while (defined(my $e = readdir $dh)) {
+        next if $e eq '.' || $e eq '..';
+        return 0 unless $e =~ /\A\./;
+        return 0 unless -d "$dir/$e";
+        $has_dot_subdirs++;
+    }
+    $has_dot_subdirs ? 1:0;
+}
+
 sub dir_has_non_dot_subdirs {
     my ($dir) = @_;
     return undef unless (-d $dir);
@@ -220,6 +250,20 @@ sub dir_has_non_dot_subdirs {
         return 1;
     }
     0;
+}
+
+sub dir_only_has_non_dot_subdirs {
+    my ($dir) = @_;
+    return undef unless (-d $dir);
+    return undef unless opendir my($dh), $dir;
+    my $has_nondot_subdirs;
+    while (defined(my $e = readdir $dh)) {
+        next if $e eq '.' || $e eq '..';
+        return 0 if $e =~ /\A\./;
+        return 0 unless -d "$dir/$e";
+        $has_nondot_subdirs++;
+    }
+    $has_nondot_subdirs ? 1:0;
 }
 
 sub get_dir_entries {
@@ -322,6 +366,9 @@ sub get_dir_non_dot_subdirs {
      dir_only_has_files
      dir_only_has_dot_files
      dir_only_has_non_dot_files
+     dir_only_has_subdirs
+     dir_only_has_dot_subdirs
+     dir_only_has_non_dot_subdirs
 
      get_dir_entries
      get_dir_dot_entries
@@ -526,6 +573,33 @@ Usage:
 Will return true if C<$dir> exists and has one or more plain non-dot files in it
 *and* does not have anything else. See L</dir_has_files> for the definition of
 plain files.
+
+=head2 dir_only_has_subdirs
+
+Usage:
+
+ dir_only_has_subdirs($dir) => BOOL
+
+Will return true if C<$dir> exists and has one or more subdirectories in it
+*and* does not have anything else.
+
+=head2 dir_only_has_dot_subdirs
+
+Usage:
+
+ dir_only_has_dot_subdirs($dir) => BOOL
+
+Will return true if C<$dir> exists and has one or more dot subdirectories in it
+*and* does not have anything else.
+
+=head2 dir_only_has_non_dot_subdirs
+
+Usage:
+
+ dir_only_has_non_dot_subdirs($dir) => BOOL
+
+Will return true if C<$dir> exists and has one or more plain non-dot
+subdirectories in it *and* does not have anything else.
 
 =head2 get_dir_entries
 
