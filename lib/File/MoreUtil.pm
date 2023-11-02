@@ -319,6 +319,9 @@ sub get_dir_non_dot_subdirs {
      dir_has_non_subdirs
      dir_has_dot_subdirs
      dir_has_non_dot_subdirs
+     dir_only_has_files
+     dir_only_has_dot_files
+     dir_only_has_non_dot_files
 
      get_dir_entries
      get_dir_dot_entries
