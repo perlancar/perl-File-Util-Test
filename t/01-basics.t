@@ -286,7 +286,7 @@ subtest "get_dir_*{entries,files,subdirs}" => sub {
         local $CWD = "subdir1";
         is_deeply([get_dir_only_file()], []);
         write_text "f1", "";
-        is_deeply(get_dir_only_file(), "f1");
+        is_deeply([get_dir_only_file()], ["f1"]);
         write_text "f2", "";
         is_deeply([get_dir_only_file()], []);
     }
@@ -294,7 +294,7 @@ subtest "get_dir_*{entries,files,subdirs}" => sub {
         local $CWD = "subdir2";
         is_deeply([get_dir_only_subdir()], []);
         mkdir "d1";
-        is_deeply(get_dir_only_subdir(), "d1");
+        is_deeply([get_dir_only_subdir()], ["d1"]);
         mkdir "d2";
         is_deeply([get_dir_only_subdir()], []);
     }
