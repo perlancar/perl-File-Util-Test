@@ -9,7 +9,7 @@ use Cwd qw(abs_path);
 use File::chdir;
 use File::Slurper qw(write_text);
 use File::Spec;
-use File::MoreUtil qw(
+use File::Util::Test qw(
                          file_exists
                          l_abs_path
                          dir_empty

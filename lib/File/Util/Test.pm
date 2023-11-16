@@ -1,5 +1,5 @@
 ## no critic: Subroutines::ProhibitExplicitReturnUndef
-package File::MoreUtil;
+package File::Util::Test;
 
 use 5.010001;
 use strict;
@@ -380,11 +380,11 @@ sub get_dir_only_subdir {
 }
 
 1;
-# ABSTRACT: File-related utilities
+# ABSTRACT: Utilities related mostly to testing/checking for files in directories
 
 =head1 SYNOPSIS
 
- use File::MoreUtil qw(
+ use File::Util::Test qw(
      file_exists
      l_abs_path
      dir_empty
