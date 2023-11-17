@@ -1,3 +1,11 @@
+0.629   2023-11-17  Released-By: PERLANCAR; Urgency: medium
+
+        - Rename module/dist File::MoreUtil -> File::Util::Test.
+
+        - Tweak tests (avoid having empty list returned affecting
+          is_deeply().
+
+
 0.628   2023-11-02  Released-By: PERLANCAR; Urgency: high
 
         - [bugfix] Fix testing the correct path in get_*{files,subdirs}.
