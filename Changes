@@ -1,6 +1,7 @@
 0.629   2023-11-17  Released-By: PERLANCAR; Urgency: medium
 
-        - Rename module/dist File::MoreUtil -> File::Util::Test.
+        - Rename module/dist File::MoreUtil -> File::Util::Test to be more
+          consistent with other File::Util::* modules.
 
         - Tweak tests (avoid having empty list returned affecting
           is_deeply().
