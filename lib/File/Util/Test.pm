@@ -269,8 +269,12 @@ sub dir_only_has_non_dot_subdirs {
 }
 
 sub get_dir_entries {
+    my $opts = ref $_[0] eq 'HASH' ? {%{shift()}} : {};
+    die "Unknown option(s): ".join(", ", keys %$opts) if keys %$opts;
+
     my ($dir) = @_;
     $dir //= ".";
+
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
     my @res = grep { $_ ne '.' && $_ ne '..' } readdir $dh;
     closedir $dh; # we're so nice
@@ -278,8 +282,12 @@ sub get_dir_entries {
 }
 
 sub get_dir_dot_entries {
+    my $opts = ref $_[0] eq 'HASH' ? {%{shift()}} : {};
+    die "Unknown option(s): ".join(", ", keys %$opts) if keys %$opts;
+
     my ($dir) = @_;
     $dir //= ".";
+
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
     my @res = grep { $_ ne '.' && $_ ne '..' && /\A\./ } readdir $dh;
     closedir $dh; # we're so nice
@@ -287,8 +295,12 @@ sub get_dir_dot_entries {
 }
 
 sub get_dir_files {
+    my $opts = ref $_[0] eq 'HASH' ? {%{shift()}} : {};
+    die "Unknown option(s): ".join(", ", keys %$opts) if keys %$opts;
+
     my ($dir) = @_;
     $dir //= ".";
+
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
     my @res = grep { $_ ne '.' && $_ ne '..' && (-f "$dir/$_")} readdir $dh;
     closedir $dh; # we're so nice
@@ -296,8 +308,12 @@ sub get_dir_files {
 }
 
 sub get_dir_dot_files {
+    my $opts = ref $_[0] eq 'HASH' ? {%{shift()}} : {};
+    die "Unknown option(s): ".join(", ", keys %$opts) if keys %$opts;
+
     my ($dir) = @_;
     $dir //= ".";
+
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
     my @res = grep { $_ ne '.' && $_ ne '..' && /\A\./ && (-f "$dir/$_")} readdir $dh;
     closedir $dh; # we're so nice
@@ -305,8 +321,12 @@ sub get_dir_dot_files {
 }
 
 sub get_dir_non_dot_files {
+    my $opts = ref $_[0] eq 'HASH' ? {%{shift()}} : {};
+    die "Unknown option(s): ".join(", ", keys %$opts) if keys %$opts;
+
     my ($dir) = @_;
     $dir //= ".";
+
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
     my @res = grep { $_ ne '.' && $_ ne '..' && !/\A\./ && (-f "$dir/$_")} readdir $dh;
     closedir $dh; # we're so nice
@@ -314,8 +334,12 @@ sub get_dir_non_dot_files {
 }
 
 sub get_dir_subdirs {
+    my $opts = ref $_[0] eq 'HASH' ? {%{shift()}} : {};
+    die "Unknown option(s): ".join(", ", keys %$opts) if keys %$opts;
+
     my ($dir) = @_;
     $dir //= ".";
+
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
     my @res = grep { $_ ne '.' && $_ ne '..' && !(-l "$dir/$_") && (-d _) } readdir $dh;
     closedir $dh; # we're so nice
@@ -323,8 +347,12 @@ sub get_dir_subdirs {
 }
 
 sub get_dir_non_subdirs {
+    my $opts = ref $_[0] eq 'HASH' ? {%{shift()}} : {};
+    die "Unknown option(s): ".join(", ", keys %$opts) if keys %$opts;
+
     my ($dir) = @_;
     $dir //= ".";
+
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
     my @res = grep { $_ ne '.' && $_ ne '..' && ((-l "$dir/$_") || !(-d _)) } readdir $dh;
     closedir $dh; # we're so nice
@@ -332,8 +360,12 @@ sub get_dir_non_subdirs {
 }
 
 sub get_dir_dot_subdirs {
+    my $opts = ref $_[0] eq 'HASH' ? {%{shift()}} : {};
+    die "Unknown option(s): ".join(", ", keys %$opts) if keys %$opts;
+
     my ($dir) = @_;
     $dir //= ".";
+
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
     my @res = grep { $_ ne '.' && $_ ne '..' && /\A\./ && !(-l "$dir/$_") && (-d _) } readdir $dh;
     closedir $dh; # we're so nice
@@ -341,8 +373,12 @@ sub get_dir_dot_subdirs {
 }
 
 sub get_dir_non_dot_subdirs {
+    my $opts = ref $_[0] eq 'HASH' ? {%{shift()}} : {};
+    die "Unknown option(s): ".join(", ", keys %$opts) if keys %$opts;
+
     my ($dir) = @_;
     $dir //= ".";
+
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
     my @res = grep { $_ ne '.' && $_ ne '..' && !/\A\./ && !(-l "$dir/$_") && (-d _) } readdir $dh;
     closedir $dh; # we're so nice
@@ -350,13 +386,20 @@ sub get_dir_non_dot_subdirs {
 }
 
 sub get_dir_only_file {
+    my $opts = ref $_[0] eq 'HASH' ? {%{shift()}} : {};
+    my $opt_ignore_dir = delete $opts->{ignore_dir};
+    die "Unknown option(s): ".join(", ", keys %$opts) if keys %$opts;
+
     my ($dir) = @_;
     $dir //= ".";
+
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
     my $res;
     while (defined(my $e = readdir $dh)) {
         next if $e eq '.' || $e eq '..';
-        return unless -f "$dir/$e";
+        my @st = stat "$dir/$e";
+        next if -d _ && $opt_ignore_dir;
+        return unless -f _;
         return if defined $res;
         $res = $e;
     }
@@ -365,13 +408,20 @@ sub get_dir_only_file {
 }
 
 sub get_dir_only_subdir {
+    my $opts = ref $_[0] eq 'HASH' ? {%{shift()}} : {};
+    my $opt_ignore_file = delete $opts->{ignore_file};
+    die "Unknown option(s): ".join(", ", keys %$opts) if keys %$opts;
+
     my ($dir) = @_;
     $dir //= ".";
+
     opendir my($dh), $dir or die "Can't opendir $dir: $!";
     my $res;
     while (defined(my $e = readdir $dh)) {
         next if $e eq '.' || $e eq '..';
-        return unless -d "$dir/$e";
+        my @st = stat "$dir/$e";
+        next if -f _ && $opt_ignore_file;
+        return unless -d _;
         return if defined $res;
         $res = $e;
     }
@@ -612,7 +662,7 @@ plain files.
 
 Usage:
 
- dir_only_has_subdirs($dir) => BOOL
+ dir_only_has_subdirs([ \%opts, ] $dir) => BOOL
 
 Will return true if C<$dir> exists and has one or more subdirectories in it
 *and* does not have anything else.
@@ -621,7 +671,7 @@ Will return true if C<$dir> exists and has one or more subdirectories in it
 
 Usage:
 
- dir_only_has_dot_subdirs($dir) => BOOL
+ dir_only_has_dot_subdirs([ \%opts, ] $dir) => BOOL
 
 Will return true if C<$dir> exists and has one or more dot subdirectories in it
 *and* does not have anything else.
@@ -630,7 +680,7 @@ Will return true if C<$dir> exists and has one or more dot subdirectories in it
 
 Usage:
 
- dir_only_has_non_dot_subdirs($dir) => BOOL
+ dir_only_has_non_dot_subdirs([ \%opts, ] $dir) => BOOL
 
 Will return true if C<$dir> exists and has one or more plain non-dot
 subdirectories in it *and* does not have anything else.
@@ -639,7 +689,7 @@ subdirectories in it *and* does not have anything else.
 
 Usage:
 
- my @entries = get_dir_entries([ $dir ]);
+ my @entries = get_dir_entries([ \%opts, ] [ $dir ]);
 
 Get all entries of a directory specified by C<$dir> (or the current dir if
 unspecified), including dotfiles but excluding "." and "..". Dies if directory
@@ -653,7 +703,7 @@ Basically a shortcut for something like:
 
 Usage:
 
- my @dot_entries = get_dir_dot_entries([ $dir ]);
+ my @dot_entries = get_dir_dot_entries([ \%opts, ] [ $dir ]);
 
 Get all "dot" entries of a directory specified by C<$dir> (or the current dir if
 unspecified), excluding "." and "..". Dies if directory does not exist or cannot
@@ -667,7 +717,7 @@ Basically a shortcut for something like:
 
 Usage:
 
- my @filenames = get_dir_files([ $dir ]);
+ my @filenames = get_dir_files([ \%opts, ] [ $dir ]);
 
 Get all plain filename entries of a directory specified by C<$dir> (or the
 current dir if unspecified), including dotfiles but excluding "." and "..". See
@@ -682,7 +732,7 @@ Basically a shortcut for something like:
 
 Usage:
 
- my @dot_filenames = get_dir_dot_files([ $dir ]);
+ my @dot_filenames = get_dir_dot_files([ \%opts, ] [ $dir ]);
 
 Get all "dot" plain filename entries of a directory specified by C<$dir> (or the
 current dir if unspecified). See L</dir_has_files> for definition of "plain
@@ -696,7 +746,7 @@ Basically a shortcut for something like:
 
 Usage:
 
- my @non_dot_filenames = get_dir_non_dot_files([ $dir ]);
+ my @non_dot_filenames = get_dir_non_dot_files([ \%opts, ] [ $dir ]);
 
 Get all non-"dot" plain filename entries of a directory specified by C<$dir> (or
 the current dir if unspecified). See L</dir_has_files> for definition of "plain
@@ -710,7 +760,7 @@ Basically a shortcut for something like:
 
 Usage:
 
- my @subdirnames = get_dir_subdirs([ $dir ]);
+ my @subdirnames = get_dir_subdirs([ \%opts, ] [ $dir ]);
 
 Get all subdirectory entries of a directory specified by C<$dir> (or the current
 dir if unspecified), including dotsubdirs but excluding "." and "..". See
@@ -725,7 +775,7 @@ Basically a shortcut for something like:
 
 Usage:
 
- my @nonsubdirnames = get_dir_non_subdirs([ $dir ]);
+ my @nonsubdirnames = get_dir_non_subdirs([ \%opts, ] [ $dir ]);
 
 Get all non-subdirectory entries of a directory specified by C<$dir> (or the
 current dir if unspecified). See L</dir_has_subdirs> for definition of
@@ -739,7 +789,7 @@ Basically a shortcut for something like:
 
 Usage:
 
- my @dot_subdirnames = get_dir_dot_subdirs([ $dir ]);
+ my @dot_subdirnames = get_dir_dot_subdirs([ \%opts, ] [ $dir ]);
 
 Get all "dot" subdirectory entries of a directory specified by C<$dir> (or the
 current dir if unspecified). See L</dir_has_subdirs> for definition of
@@ -753,7 +803,7 @@ Basically a shortcut for something like:
 
 Usage:
 
- my @non_dot_subdirnames = get_dir_non_dot_subdirs([ $dir ]);
+ my @non_dot_subdirnames = get_dir_non_dot_subdirs([ \%opts, ] [ $dir ]);
 
 Get all non-"dot" subdirectory entries of a directory specified by C<$dir> (or
 the current dir if unspecified). See L</dir_has_subdirs> for definition of
@@ -767,19 +817,39 @@ Basically a shortcut for something like:
 
 Usage:
 
- my $filename = get_dir_only_file([ $dir ]);
+ my $filename = get_dir_only_file([ \%opts, ] [ $dir ]);
 
 Return filename inside directory C<$dir> (or current directory if unspecified)
 only if C<$dir> has a single plain file and nothing else.
+
+Known options:
+
+=over
+
+=item * ignore_dir
+
+Boolean. If set to true, then ignore subdirectories.
+
+=back
 
 =head2 get_dir_only_subdir
 
 Usage:
 
- my $subdirname = get_dir_only_subdir([ $dir ]);
+ my $subdirname = get_dir_only_subdir([ \%opts, ] [ $dir ]);
 
 Return subdirectory name inside directory C<$dir> (or current directory if
 unspecified) only if C<$dir> has a single subdirectory and nothing else.
+
+Known options:
+
+=over
+
+=item * ignore_file
+
+Boolean. If set to true, then ignore files.
+
+=back
 
 
 =head1 FAQ

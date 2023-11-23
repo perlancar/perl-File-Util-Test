@@ -285,18 +285,38 @@ subtest "get_dir_*{entries,files,subdirs}" => sub {
     {
         local $CWD = "subdir1";
         is_deeply([get_dir_only_file()], []);
+        is_deeply([get_dir_only_file({ignore_dir=>1})], []);
+
         write_text "f1", "";
         is_deeply([get_dir_only_file()], ["f1"]);
+        is_deeply([get_dir_only_file({ignore_dir=>1})], ["f1"]);
+
+        mkdir "d1";
+        is_deeply([get_dir_only_file()], []);
+        is_deeply([get_dir_only_file({ignore_dir=>1})], ["f1"]);
+        rmdir "d1";
+
         write_text "f2", "";
         is_deeply([get_dir_only_file()], []);
+        is_deeply([get_dir_only_file({ignore_dir=>1})], []);
     }
     {
         local $CWD = "subdir2";
         is_deeply([get_dir_only_subdir()], []);
+        is_deeply([get_dir_only_subdir({ignore_file=>1})], []);
+
         mkdir "d1";
         is_deeply([get_dir_only_subdir()], ["d1"]);
+        is_deeply([get_dir_only_subdir({ignore_file=>1})], ["d1"]);
+
+        write_text "f1", "";
+        is_deeply([get_dir_only_subdir()], []);
+        is_deeply([get_dir_only_subdir({ignore_file=>1})], ["d1"]);
+        unlink "f1";
+
         mkdir "d2";
         is_deeply([get_dir_only_subdir()], []);
+        is_deeply([get_dir_only_subdir({ignore_file=>1})], []);
     }
 
 };
