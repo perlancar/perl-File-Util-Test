@@ -484,6 +484,7 @@ sub get_dir_only_symlink {
      get_dir_non_dot_files
      get_dir_only_file
      get_dir_only_subdir
+     get_dir_only_symlink
  );
 
  print "file exists" if file_exists("/path/to/file/or/dir");
