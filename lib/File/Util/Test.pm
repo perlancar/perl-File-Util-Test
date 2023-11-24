@@ -44,6 +44,7 @@ our @EXPORT_OK = qw(
                        get_dir_non_dot_files
                        get_dir_only_file
                        get_dir_only_subdir
+                       get_dir_only_symlink
                );
 
 our %SPEC;
@@ -422,6 +423,26 @@ sub get_dir_only_subdir {
         my @st = stat "$dir/$e";
         next if -f _ && $opt_ignore_file;
         return unless -d _;
+        return if defined $res;
+        $res = $e;
+    }
+    return unless defined $res;
+    $res;
+}
+
+sub get_dir_only_symlink {
+    my $opts = ref $_[0] eq 'HASH' ? {%{shift()}} : {};
+    die "Unknown option(s): ".join(", ", keys %$opts) if keys %$opts;
+
+    my ($dir) = @_;
+    $dir //= ".";
+
+    opendir my($dh), $dir or die "Can't opendir $dir: $!";
+    my $res;
+    while (defined(my $e = readdir $dh)) {
+        next if $e eq '.' || $e eq '..';
+        my @st = lstat "$dir/$e";
+        return unless -l _;
         return if defined $res;
         $res = $e;
     }
@@ -850,6 +871,15 @@ Known options:
 Boolean. If set to true, then ignore files.
 
 =back
+
+=head2 get_dir_only_symlink
+
+Usage:
+
+ my $filename = get_dir_only_symlink([ \%opts, ] [ $dir ]);
+
+Return symlink name inside directory C<$dir> (or current directory if
+unspecified) only if C<$dir> has a single symlink and nothing else.
 
 
 =head1 FAQ

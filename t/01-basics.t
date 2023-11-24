@@ -40,6 +40,7 @@ use File::Util::Test qw(
                          get_dir_non_dot_files
                          get_dir_only_file
                          get_dir_only_subdir
+                         get_dir_only_symlink
                  );
 use File::Temp qw(tempfile tempdir);
 
@@ -318,7 +319,20 @@ subtest "get_dir_*{entries,files,subdirs}" => sub {
         is_deeply([get_dir_only_subdir()], []);
         is_deeply([get_dir_only_subdir({ignore_file=>1})], []);
     }
+    subtest "get_dir_only_symlink" => sub {
+        plan skip_all => "Symlink not available on this system"
+            unless eval { symlink("",""); 1 };
+        mkdir "subdir3", 0755;
+        local $CWD = "subdir3";
 
+        is_deeply([get_dir_only_symlink()], []);
+
+        symlink "/", "l1";
+        is_deeply([get_dir_only_symlink()], ["l1"]);
+
+        symlink "/", "l2";
+        is_deeply([get_dir_only_symlink()], []);
+    };
 };
 
 subtest "dir_empty, dir_has_*files, dir_has_*subdirs, get_* (symlink tests)" => sub {
